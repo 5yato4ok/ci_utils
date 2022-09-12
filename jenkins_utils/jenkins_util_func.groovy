@@ -121,10 +121,10 @@ def getCommitTimestamp(def repoPath, def timestmapFormat) {
     }
 }
 
-def thisCommitIsInMasterAlready(def repoPath, def commitHash) {
+def thisCommitIsInTargetAlready(def repoPath, def commitHash, def targetBranch) {
     dir(repoPath) {
         def msgRaw = sh(script: "git branch --contains ${commitHash}", returnStdout: true) as String
-        return msgRaw.split('\n').contains('* master')
+        return msgRaw.split('\n').contains("* $targetBranch")
     }
 }
 
@@ -164,7 +164,7 @@ def cloneRepoWithoutPlugin(String branch, String merge_branch, def url, def time
     repoInfo['cooddyGitCommitTimestamp'] = getCommitTimestamp("$WORKSPACE", timestmapFormat)
     repoInfo['cooddyGitTag'] = trimToNull(getGitTag("$WORKSPACE"))
     repoInfo['cooddyBranch'] = branch.replace( 'origin/', '')
-    if (!thisCommitIsInMasterAlready(WORKSPACE, repoInfo['cooddyGit Commit']) && repoInfo['cooddyGitTag'] == null
+    if (!thisCommitIsInTargetAlready(WORKSPACE, repoInfo['cooddyGit Commit'], 'master') && repoInfo['cooddyGitTag'] == null
             && branch != merge_branch) {
         sh "git merge origin/$merge_branch"
             }
